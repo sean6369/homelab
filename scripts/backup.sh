@@ -41,6 +41,14 @@ borg prune \
 echo "=== borg compact: $(date -Iseconds) ==="
 borg compact
 
+# --- mirror to object storage (copy 2, runs on Oracle) -------------------
+echo "=== bucket sync: $(date -Iseconds) ==="
+ssh -i /home/seanlsk/.ssh/oracle_sync \
+    -T \
+    -o BatchMode=yes \
+    -o ConnectTimeout=30 \
+    ubuntu@100.127.86.10
+
 # --- notify --------------------------------------------------------------
 if [ -n "$KUMA_PUSH_URL" ]; then
     curl -fsS --retry 3 --max-time 30 "$KUMA_PUSH_URL" > /dev/null
