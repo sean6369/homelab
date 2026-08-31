@@ -10,7 +10,7 @@ export BORG_RSH="ssh -i /home/seanlsk/.ssh/borg_oracle"
 export BORG_PASSCOMMAND="cat /home/seanlsk/.borg-passphrase"
 export BORG_REPO="ssh://borg@100.127.86.10/srv/borg/leedon2server"
 
-KUMA_PUSH_URL=""     # filled in at step 6
+KUMA_PUSH_URL="$(cat /etc/borg-kuma-url 2>/dev/null || true)"
 
 # --- what to back up -----------------------------------------------------
 # Paths grow as services return in Phase 5.
