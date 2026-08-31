@@ -1,0 +1,32 @@
+# Deny everything by default. Nothing is committed unless allowlisted below.
+# This is deliberate: the repo is public, so an unlisted file must never
+# be committable by accident.
+*
+
+# Allow directory traversal so the rules below can match in subdirectories
+!*/
+
+# Documentation and repo metadata
+!.gitignore
+!.sops.yaml
+!*.md
+
+# Compose files (secrets live in .sops.env, never inline)
+!**/compose.yaml
+!**/docker-compose.yml
+
+# SOPS-encrypted secrets ONLY. Note the .sops. infix.
+!**/*.sops.env
+!**/*.sops.yaml
+
+# Scripts
+!scripts/**/*.sh
+
+# Explicit belt-and-braces denials for things that must never appear,
+# even if a rule above is later loosened.
+.env
+**/.env
+*.key
+*.pem
+id_*
+keys.txt
