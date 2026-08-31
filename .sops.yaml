@@ -1,0 +1,7 @@
+# Which files SOPS encrypts, and with which age recipient.
+# creation_rules are evaluated top-down; the first matching path_regex wins.
+creation_rules:
+  - path_regex: \.sops\.env$
+    age: age1hg59ppk0907r3tvqzn7wy0adgl4rem7hxn76zhcta0wtv8k7d4eqyh9dju
+  - path_regex: \.sops\.yaml$
+    age: age1hg59ppk0907r3tvqzn7wy0adgl4rem7hxn76zhcta0wtv8k7d4eqyh9dju
