@@ -18,7 +18,34 @@ BACKUP_PATHS=(
     /etc/netplan
     /etc/ssh
     /home/seanlsk/homelab
+    /srv/backup/staging
 )
+
+# --- dump databases ------------------------------------------------------
+# pg_dump runs INSIDE the container, so the client version can never skew
+# from the server. Connects over the container's Unix socket (trust auth),
+# so no password and no SOPS decryption is needed in an unattended job.
+echo "=== pg_dump: $(date -Iseconds) ==="
+STAGING=/srv/backup/staging
+
+# -Fc  custom format: pg_restore can do selective and parallel restores
+# -Z 0 no pg_dump compression: compressed output changes every byte on any
+#      change, which defeats Borg's chunker and stores a whole new copy
+#      nightly. Borg compresses on its own.
+/usr/bin/docker exec -i newsapp-db \
+    pg_dump -U newsapp -Fc -Z 0 newsapp > "$STAGING/newsapp.dump.tmp"
+
+# Validate before replacing the previous good dump. pg_restore -l reads the
+# archive's table of contents; it fails on a truncated or corrupt file.
+# It must read a real file, not a pipe — pg_restore seeks, and /dev/stdin
+# on a redirect is not seekable.
+/usr/bin/docker cp "$STAGING/newsapp.dump.tmp" newsapp-db:/tmp/verify.dump
+/usr/bin/docker exec newsapp-db pg_restore -l /tmp/verify.dump > /dev/null
+/usr/bin/docker exec newsapp-db rm /tmp/verify.dump
+
+mv "$STAGING/newsapp.dump.tmp" "$STAGING/newsapp.dump"
+chmod 600 "$STAGING/newsapp.dump"
+ls -lh "$STAGING/newsapp.dump"
 
 # --- create --------------------------------------------------------------
 echo "=== borg create: $(date -Iseconds) ==="
