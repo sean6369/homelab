@@ -1,0 +1,63 @@
+services:
+  app:
+    image: seanlsk/newsapp:latest
+    container_name: newsapp-app
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      DATABASE_URL: postgresql://newsapp:${POSTGRES_PASSWORD}@db:5432/newsapp
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # Pinned against the code default changing on a future image pull.
+      # The immovable part is the 1536 dimensions, hardcoded in gemini.ts and
+      # declared as vector(1536) on articles.embedding. A different model name
+      # is handled gracefully (rows carry embedding_model and re-embed), but
+      # only if the replacement also returns 1536 dims.
+      GEMINI_EMBEDDING_MODEL: gemini-embedding-2
+      GOTENBERG_URL: http://gotenberg:3000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [newsapp-net]
+
+  db:
+    image: pgvector/pgvector:pg18
+    container_name: newsapp-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: newsapp
+      # Read ONLY at initdb, on an empty volume. After that the password lives
+      # in the database. Rotating this secret alone breaks auth — see runbook.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: newsapp
+    volumes:
+      # One mount at /var/lib/postgresql, NOT .../data — pg18 moved PGDATA.
+      - pg_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U newsapp"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      # initdb on a fresh volume needs longer than interval x retries = 25s,
+      # or the app's service_healthy gate refuses to start on first boot.
+      start_period: 30s
+    networks: [newsapp-net]
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    container_name: newsapp-gotenberg
+    restart: unless-stopped
+    networks: [newsapp-net]
+
+volumes:
+  pg_data:
+    # external: Compose will NOT create this if missing, and `down -v` cannot
+    # remove it. A destroyed volume becomes a startup failure instead of a
+    # silently empty database. Create once: docker volume create newsapp_pg_data
+    external: true
+    name: newsapp_pg_data
+
+networks:
+  newsapp-net:
+    driver: bridge
