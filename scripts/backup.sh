@@ -18,13 +18,18 @@ BACKUP_PATHS=(
     /etc/netplan
     /etc/ssh
     /home/seanlsk/homelab
-    /srv/backup/staging
+    /srv/backup/staging          # Newsapp database dumps
+    /home/seanlsk/immich/data    # Immich library + its own .sql.gz dumps
 )
 
 # --- dump databases ------------------------------------------------------
 # pg_dump runs INSIDE the container, so the client version can never skew
 # from the server. Connects over the container's Unix socket (trust auth),
 # so no password and no SOPS decryption is needed in an unattended job.
+# Immich is deliberately NOT dumped here. It runs its own scheduled pg_dump
+# into UPLOAD_LOCATION/backups as .sql.gz, and the supported restore path is
+# Immich's own UI (handles the search_path rewrite, migrations, rollback).
+# See homelab-setup-v3.md — Immich section.
 echo "=== pg_dump: $(date -Iseconds) ==="
 STAGING=/srv/backup/staging
 
