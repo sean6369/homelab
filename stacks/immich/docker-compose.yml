@@ -13,9 +13,15 @@ services:
   immich-server:
     container_name: immich_server
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
-    # extends:
-    #   file: hwaccel.transcoding.yml
-    #   service: cpu # set to one of [nvenc, quicksync, rkmpp, vaapi, vaapi-wsl] for accelerated transcoding
+    # QuickSync (h264_qsv) on the i7-7500U iGPU. Inlined from
+    # hwaccel.transcoding.yml's `quicksync` service, plus group_add — the
+    # upstream block omits it, and without the render group ffmpeg cannot
+    # open /dev/dri/renderD128. GID 991 = `render` on this host (NOT docker,
+    # which is 983). Verify with `getent group render` after any reinstall.
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - "991"
     volumes:
       # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
       - ${UPLOAD_LOCATION}:/data
