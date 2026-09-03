@@ -1,0 +1,23 @@
+- Photos:
+    - Immich:
+        icon: immich.png
+        href: http://192.168.1.150:2283
+        description: Photo library
+        siteMonitor: http://172.17.0.1:2283
+        server: my-docker
+        container: immich_server
+        widget:
+          type: immich
+          url: http://172.17.0.1:2283
+          key: {{HOMEPAGE_VAR_IMMICH_API_KEY}}
+          version: 2
+          fields: ["photos", "videos", "storage"]
+
+- News:
+    - News App:
+        icon: mdi-newspaper-variant
+        href: http://192.168.1.150:3002
+        description: Article pipeline
+        siteMonitor: http://172.17.0.1:3002
+        server: my-docker
+        container: newsapp-app

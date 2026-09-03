@@ -14,6 +14,7 @@
 # Compose files (secrets live in .sops.env, never inline)
 !**/compose.yaml
 !**/docker-compose.yml
+!stacks/homepage/config/*.yaml
 
 # SOPS-encrypted secrets ONLY. Note the .sops. infix.
 !**/*.sops.env

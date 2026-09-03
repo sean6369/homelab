@@ -1,0 +1,17 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: homepage
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    group_add:
+      - "983"
+    volumes:
+      - ./config:/app/config
+      - ./icons:/app/public/icons
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      TZ: Asia/Singapore
+      HOMEPAGE_ALLOWED_HOSTS: 192.168.1.150:3000,100.80.52.82:3000,leedon2server:3000
+      HOMEPAGE_VAR_IMMICH_API_KEY: ${HOMEPAGE_VAR_IMMICH_API_KEY}
