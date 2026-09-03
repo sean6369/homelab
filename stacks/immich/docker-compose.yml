@@ -36,8 +36,10 @@ services:
     ports:
       - '2283:2283'
     depends_on:
-      - redis
-      - database
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
     restart: always
     healthcheck:
       disable: false
