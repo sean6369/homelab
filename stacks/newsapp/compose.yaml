@@ -20,12 +20,6 @@ services:
       db:
         condition: service_healthy
     networks: [newsapp-net]
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: newsapp-cloudflared
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
-    networks: [newsapp-net]
 
   db:
     image: pgvector/pgvector:pg18

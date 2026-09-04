@@ -1,0 +1,15 @@
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks: [newsapp-net, immich-net]
+
+networks:
+  newsapp-net:
+    external: true
+    name: newsapp_newsapp-net
+  immich-net:
+    external: true
+    name: immich_default
