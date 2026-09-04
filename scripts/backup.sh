@@ -18,8 +18,9 @@ BACKUP_PATHS=(
     /etc/netplan
     /etc/ssh
     /home/seanlsk/homelab
-    /srv/backup/staging          # Newsapp database dumps
-    /home/seanlsk/immich/data    # Immich library + its own .sql.gz dumps
+    /srv/backup/staging              # Newsapp database dumps
+    /home/seanlsk/immich/data        # Immich library + its own .sql.gz dumps
+    /home/seanlsk/nextcloud/backup   # Nextcloud AIO's own Borg repo (db + config + files)
 )
 
 # --- dump databases ------------------------------------------------------
