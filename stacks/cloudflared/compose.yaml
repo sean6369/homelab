@@ -4,7 +4,7 @@ services:
     container_name: cloudflared
     restart: unless-stopped
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
-    networks: [newsapp-net, immich-net, nextcloud-net]
+    networks: [newsapp-net, immich-net, nextcloud-net, familyapp-net]
 
 networks:
   newsapp-net:
@@ -13,6 +13,9 @@ networks:
   immich-net:
     external: true
     name: immich_default
+  familyapp-net:
+    external: true
+    name: familyapp_default
   nextcloud-net:
     external: true
     name: nextcloud-aio

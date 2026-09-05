@@ -16,8 +16,13 @@
 - News:
     - News App:
         icon: mdi-newspaper-variant
-        href: http://192.168.1.150:3002
+        href: https://news.oxleypawnshop.com
         description: Article pipeline
-        siteMonitor: http://172.17.0.1:3002
+        siteMonitor: https://news.oxleypawnshop.com
         server: my-docker
         container: newsapp-app
+
+    - Family App:
+        icon: mdi-home-heart
+        href: https://family.oxleypawnshop.com
+        siteMonitor: https://family.oxleypawnshop.com
