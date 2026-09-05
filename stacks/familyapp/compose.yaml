@@ -1,0 +1,51 @@
+services:
+  familyapp:
+    image: seanlsk/familyapp:latest
+    container_name: leedon2family
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - /home/seanlsk/familyapp/data:/app/data
+    environment:
+      - DATABASE_PATH=/app/data/leedon2family.db
+      - UPLOAD_DIR=/app/data/uploads
+      - TZ=Asia/Singapore
+      - IMMICH_API_URL=http://immich-server:2283
+      - NEXTCLOUD_URL=https://cloud.oxleypawnshop.com
+      - APP_URL=https://family.oxleypawnshop.com
+      - IMMICH_API_KEY
+      - IMMICH_ALBUM_ID
+      - NEXTCLOUD_USERNAME
+      - NEXTCLOUD_PASSWORD
+      - ANTHROPIC_API_KEY
+      - AUTH_SECRET
+      - TELEGRAM_BOT_TOKEN
+      - TELEGRAM_WEBHOOK_SECRET
+      - TELEGRAM_FAMILY_CHAT_ID
+      - TELEGRAM_BOT_USERNAME
+      - IMMICH_API_KEY_PA
+      - IMMICH_API_KEY_MOM
+      - IMMICH_API_KEY_SEAN
+      - IMMICH_API_KEY_JADE
+      - IMMICH_API_KEY_KYM
+      - IMMICH_API_KEY_PEARL
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - default
+      - immich-net
+
+networks:
+  immich-net:
+    external: true
+    name: immich_default

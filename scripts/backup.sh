@@ -21,6 +21,7 @@ BACKUP_PATHS=(
     /srv/backup/staging              # Newsapp database dumps
     /home/seanlsk/immich/data        # Immich library + its own .sql.gz dumps
     /home/seanlsk/nextcloud/backup   # Nextcloud AIO's own Borg repo (db + config + files)
+    /home/seanlsk/familyapp/data     # SQLite DB + uploads
 )
 
 # --- dump databases ------------------------------------------------------
@@ -52,6 +53,31 @@ STAGING=/srv/backup/staging
 mv "$STAGING/newsapp.dump.tmp" "$STAGING/newsapp.dump"
 chmod 600 "$STAGING/newsapp.dump"
 ls -lh "$STAGING/newsapp.dump"
+
+# --- familyapp: SQLite ---------------------------------------------------
+# journal_mode=wal confirmed, so committed data can live in the -wal file.
+# A plain copy of the .db alone can be torn. .backup uses SQLite's online
+# backup API and produces one consistent file. Same reasoning as pg_dump
+# vs. Borg-on-the-datadir (design §5.2).
+FAMILYDB=/home/seanlsk/familyapp/data/leedon2family.db
+
+sqlite3 "$FAMILYDB" ".backup '$STAGING/familyapp.db.tmp'"
+
+# Validate before replacing the previous good copy — the analogue of
+# `pg_restore -l` on the newsapp dump.
+sqlite3 "$STAGING/familyapp.db.tmp" "PRAGMA integrity_check;" | grep -qx ok
+
+mv "$STAGING/familyapp.db.tmp" "$STAGING/familyapp.db"
+chmod 600 "$STAGING/familyapp.db"
+ls -lh "$STAGING/familyapp.db"
+
+# Record the running image digest. With :latest there is no tag to roll back
+# to, so this is what pairs an old dump with the image it was written by.
+# NOTE: RepoDigests is an IMAGE field, not a container field — resolve the
+# container's image ID first, then inspect that.
+FAMILY_IMAGE_ID="$(/usr/bin/docker inspect --format '{{.Image}}' leedon2family)"
+/usr/bin/docker inspect --format '{{index .RepoDigests 0}}' "$FAMILY_IMAGE_ID" \
+    > "$STAGING/familyapp-image.txt"
 
 # --- create --------------------------------------------------------------
 echo "=== borg create: $(date -Iseconds) ==="
